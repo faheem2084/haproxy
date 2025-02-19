@@ -1,0 +1,38 @@
+services:
+  # HAProxy Load Balancer
+  haproxy:
+    image: haproxy:2.6
+    container_name: haproxy
+    ports:
+      - "80:80"
+      - "8080:8080"  # HAProxy stats dashboard (optional)
+    volumes:
+      - ./app/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - webserver1
+      - webserver2
+    networks:
+      - app-network
+
+  # First HTTP Server (Apache)
+  webserver1:
+    image: httpd:alpine
+    container_name: webserver1
+    volumes:
+      - ./app/html1:/usr/local/apache2/htdocs:ro
+    networks:
+      - app-network
+
+  # Second HTTP Server (Apache)
+  webserver2:
+    image: httpd:alpine
+    container_name: webserver2
+    volumes:
+      - ./app/html2:/usr/local/apache2/htdocs:ro
+    networks:
+      - app-network
+
+# Define a custom network for the services
+networks:
+  app-network:
+    driver: bridge
